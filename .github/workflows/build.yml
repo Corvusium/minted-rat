@@ -10,19 +10,19 @@ jobs:
         with:
           arch: x64
 
-      - name: Install vcpkg & dependencies (dynamic)
+      - name: Install vcpkg & dependencies (Release only)
+        env:
+          VCPKG_BUILD_TYPE: release   # <-- skip Debug builds
         run: |
           git clone https://github.com/microsoft/vcpkg
           cd vcpkg
           .\bootstrap-vcpkg.bat
           .\vcpkg install dpp:x64-windows nlohmann-json:x64-windows curl:x64-windows sqlite3:x64-windows openssl:x64-windows
-        shell: pwsh
 
       - name: Build RAT
         run: |
-          cmake -B build -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows
+          cmake -B build -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows -DCMAKE_BUILD_TYPE=Release
           cmake --build build --config Release
-        shell: pwsh
 
       - name: Collect binaries
         run: |
