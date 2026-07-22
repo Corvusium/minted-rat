@@ -10,20 +10,28 @@ jobs:
         with:
           arch: x64
 
-      - name: Install vcpkg & dependencies
+      - name: Install vcpkg & dependencies (dynamic)
         run: |
           git clone https://github.com/microsoft/vcpkg
           cd vcpkg
           .\bootstrap-vcpkg.bat
-          .\vcpkg install dpp:x64-windows-static nlohmann-json:x64-windows-static curl:x64-windows-static sqlite3:x64-windows-static openssl:x64-windows-static
+          .\vcpkg install dpp:x64-windows nlohmann-json:x64-windows curl:x64-windows sqlite3:x64-windows openssl:x64-windows
+        shell: pwsh
 
       - name: Build RAT
         run: |
-          cmake -B build -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows-static
+          cmake -B build -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows
           cmake --build build --config Release
+        shell: pwsh
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
+      - name: Collect binaries
+        run: |
+          mkdir upload
+          copy build\Release\MintedRAT.exe upload\
+          copy vcpkg\installed\x64-windows\bin\*.dll upload\
+        shell: pwsh
+
+      - uses: actions/upload-artifact@v4
         with:
           name: MintedRAT
-          path: build/Release/MintedRAT.exe
+          path: upload\
