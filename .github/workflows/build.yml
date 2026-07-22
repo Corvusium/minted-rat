@@ -1,22 +1,29 @@
-name: Build RAT
+name: Build MintedRAT
 on: push
 jobs:
   build:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+
       - uses: ilammy/msvc-dev-cmd@v1
-      - name: Install vcpkg
+        with:
+          arch: x64
+
+      - name: Install vcpkg & dependencies
         run: |
           git clone https://github.com/microsoft/vcpkg
           cd vcpkg
-          bootstrap-vcpkg.bat
-          vcpkg install dpp:x64-windows-static nlohmann-json:x64-windows-static curl:x64-windows-static sqlite3:x64-windows-static openssl:x64-windows-static
-      - name: Build
+          .\bootstrap-vcpkg.bat
+          .\vcpkg install dpp:x64-windows-static nlohmann-json:x64-windows-static curl:x64-windows-static sqlite3:x64-windows-static openssl:x64-windows-static
+
+      - name: Build RAT
         run: |
           cmake -B build -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows-static
           cmake --build build --config Release
-      - uses: actions/upload-artifact@v3
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
         with:
-          name: RAT
+          name: MintedRAT
           path: build/Release/MintedRAT.exe
